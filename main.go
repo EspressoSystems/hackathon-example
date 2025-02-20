@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,7 +9,16 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"hackathon-example/arbutil"
+
+	"github.com/EspressoSystems/espresso-sequencer-go/types/common"
 )
+
+type HotShotResponse struct {
+	Proof        *json.RawMessage     `json:"proof"`
+	Transactions []common.Transaction `json:"transactions"`
+}
 
 type Config struct {
 	HotShotURL      string        `json:"hotshot_url"`
@@ -61,13 +69,25 @@ func main() {
 			continue
 		}
 		if strings.Contains(string(availBody), "FetchBlock") {
+			fmt.Println("FetchBlock response received")
 			continue
 		}
-		var prettyJSON bytes.Buffer
-		if err := json.Indent(&prettyJSON, availBody, "", "  "); err == nil {
-			fmt.Printf("Hotshot Namespace Transactions:\n%s\n", prettyJSON.String())
-		} else {
-			fmt.Printf("Hotshot Namespace Transactions: %s\n", availBody)
+
+		var hotShotResponse HotShotResponse
+		if err := json.Unmarshal(availBody, &hotShotResponse); err != nil {
+			fmt.Println("Error parsing JSON:", err)
+			continue
+		}
+
+		for _, tx := range hotShotResponse.Transactions {
+			_, _, _, messages, err := arbutil.ParseHotShotPayload(tx.Payload)
+			if err != nil {
+				fmt.Println("Error parsing hotshot payload:", err)
+				continue
+			}
+			for i, message := range messages {
+				fmt.Printf("Message %d: %s\n", i, message)
+			}
 		}
 	}
 }
