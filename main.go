@@ -105,7 +105,7 @@ func main() {
 				}
 
 				var tx *types.Transaction = t[0]
-				var data []byte = tx.Data()
+				var data = tx.Data()
 
 				var dataHash eth_common.Hash = crypto.Keccak256Hash(data)
 
@@ -117,19 +117,14 @@ func main() {
 				fmt.Printf("Transaction Data Hash: %s\n", dataHash)
 				fmt.Printf("__________________________________________________________\n")
 
-				from, err := types.Sender(types.NewEIP155Signer(big.NewInt(int64(cfg.ChainID))), tx)
+				var EIP155Signer = types.NewLondonSigner(big.NewInt(int64(cfg.ChainID)))
+				var ArbitrumSigner = types.NewArbitrumSigner(EIP155Signer)
+
+				from, err := types.Sender(ArbitrumSigner, tx)
 				if err != nil {
 					fmt.Println("Error parsing sender:", err)
 				}
 				fmt.Printf("Transaction From: %s\n", from)
-
-				var v, r, s = tx.RawSignatureValues()
-				var from2, error = types.RecoverPlain(dataHash, r, s, v, false)
-				// var from, error = types.RecoverPlain(dataHash, r, s, v, false)
-				if error != nil {
-					fmt.Println("Error recovering plain:", error)
-				}
-				fmt.Printf("Transaction From: %s\n", from2)
 			}
 		}
 	}
