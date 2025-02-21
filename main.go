@@ -4,15 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/big"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"hackathon-example/arbutil"
+	"hackathon-example/types_utils"
 
 	"github.com/EspressoSystems/espresso-sequencer-go/types/common"
+	eth_common "github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/rlp"
 )
 
 type HotShotResponse struct {
@@ -80,13 +85,51 @@ func main() {
 		}
 
 		for _, tx := range hotShotResponse.Transactions {
-			_, _, _, messages, err := arbutil.ParseHotShotPayload(tx.Payload)
+			_, _, _, messages, err := types_utils.ParseHotShotPayload(tx.Payload)
 			if err != nil {
 				fmt.Println("Error parsing hotshot payload:", err)
 				continue
 			}
-			for i, message := range messages {
-				fmt.Printf("Message %d: %s\n", i, message)
+			for _, message := range messages {
+				var messageWithMetadata types_utils.MessageWithMetadata
+				err = rlp.DecodeBytes(message, &messageWithMetadata)
+				if err != nil {
+					fmt.Println("Error parsing message:", err)
+					continue
+				}
+				zero := big.NewInt(int64(cfg.ChainID))
+				t, err := types_utils.ParseL2Transactions(messageWithMetadata.Message, zero)
+				if err != nil {
+					fmt.Println("Error parsing L2 transactions:", err)
+					continue
+				}
+
+				var tx *types.Transaction = t[0]
+				var data []byte = tx.Data()
+
+				var dataHash eth_common.Hash = crypto.Keccak256Hash(data)
+
+				fmt.Printf("__________________________________________________________\n")
+				fmt.Printf("Transaction Type: %s\n", types_utils.GetTransactionTypeDescription(tx.Type()))
+				fmt.Printf("Transaction Destination: %s\n", tx.To())
+				fmt.Printf("Transaction Value: %s\n", tx.Value())
+				fmt.Printf("Transaction Data: %s\n", data)
+				fmt.Printf("Transaction Data Hash: %s\n", dataHash)
+				fmt.Printf("__________________________________________________________\n")
+
+				from, err := types.Sender(types.NewEIP155Signer(big.NewInt(int64(cfg.ChainID))), tx)
+				if err != nil {
+					fmt.Println("Error parsing sender:", err)
+				}
+				fmt.Printf("Transaction From: %s\n", from)
+
+				var v, r, s = tx.RawSignatureValues()
+				var from2, error = types.RecoverPlain(dataHash, r, s, v, false)
+				// var from, error = types.RecoverPlain(dataHash, r, s, v, false)
+				if error != nil {
+					fmt.Println("Error recovering plain:", error)
+				}
+				fmt.Printf("Transaction From: %s\n", from2)
 			}
 		}
 	}
