@@ -18,19 +18,38 @@ This is a simple Go project that fetches and prints namespace transactions from 
 
 - Go 1.23.2 or higher
 
+## Setup
+
+This project uses the OffchainLabs fork of go-ethereum as a Git submodule. To clone and set up the repository:
+
+### **Option 1: Clone with submodules**
+
+`git clone --recurse-submodules https://github.com/your-username/hackathon-example.git`
+`cd hackathon-example`
+
+### **Option 2: Clone and initialize submodules separately**
+
+`git clone https://github.com/your-username/hackathon-example.git`
+`cd hackathon-example`
+`git submodule init`
+`git submodule update`
+
+### **Ensure the correct go-ethereum commit**
+
+`cd go-ethereum`
+`git checkout a437823d683b7392d3513331c7ca90705b548ef7`
+`cd ..`
+
+### **Update dependencies**
+
+`go mod tidy`
+
 ## Getting Started
 
-1. **Clone the Repository**
+**Run the Application**
 
    ```bash
-   git clone <repository-url>
-   cd hackathon-example
-   ```
-
-2. **Run the Application**
-
-   ```bash
-   go run main.go
+   go run .
    ```
 
 ## Configuration
@@ -47,7 +66,9 @@ Below is an example configuration file:
 {
   "hotshot_url": "https://query.decaf.testnet.espresso.network/v0",
   "namespace": 20250115,
-  "polling_interval": 10
+  "polling_interval": 10,
+  "from": "0x0000000000000000000000000000000000000000",
+  "value": 100
 }
 ```
 
