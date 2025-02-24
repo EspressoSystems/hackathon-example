@@ -1,5 +1,7 @@
 {
     "hotshot_url": "HOTSHOT_URL",
     "chain_id": 0,
-    "polling_interval": 1
+    "polling_interval": 1,
+    "from": "0x0000000000000000000000000000000000000000",
+    "value": 10
 }
