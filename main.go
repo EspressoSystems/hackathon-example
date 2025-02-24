@@ -16,8 +16,9 @@ func main() {
 		return
 	}
 
-	log.Printf("Listening to rollup at chain ID: %d", cfg.ChainID)
-	log.Printf("Checking for transactions with value larger than %s, initiated by wallet %s", cfg.Value.String(), cfg.From)
+	log.Printf("~ Listening to rollup at chain ID: %d", cfg.ChainID)
+	log.Printf("~ Looking at transactions with value larger than %s, initiated by wallet %s", cfg.Value.String(), cfg.From)
+	log.Println("__________________________________________________________________________________________________________________")
 
 	// Frequent polling is required to ensure transactions are captured as soon as
 	// they are available, before moving to the next block.

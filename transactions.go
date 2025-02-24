@@ -26,7 +26,7 @@ func ProcessTransactions(cfg config.Config, temp_height *uint64) {
 
 	// Only log block height if it has changed
 	if blockHeight != *temp_height {
-		log.Println("Latest Block Height:", blockHeight)
+		log.Println("~ Latest fetched block height:", blockHeight)
 		*temp_height = blockHeight
 	}
 
@@ -92,16 +92,16 @@ func verifyTransactionDetails(cfg config.Config, transactions types.Transactions
 
 		var value = tx.Value()
 
-		log.Println("_________________________________________________________________________________________________")
+		log.Println("__________________________________________________________________________________________________")
 		if from.String() == cfg.From && value.Cmp(cfg.Value) >= 0 {
-			log.Printf("Alarming transaction detected: %s\n", tx.Hash().String())
-			log.Printf("Transaction Type: %s\n", GetTransactionTypeDescription(tx.Type()))
-			log.Printf("Transaction Value: %s\n", value)
-			log.Printf("Transaction Destination: %s\n", tx.To())
+			log.Printf("~ Alarming transaction detected: %s\n", tx.Hash().String())
+			log.Printf("~ Transaction Type: %s\n", GetTransactionTypeDescription(tx.Type()))
+			log.Printf("~ Transaction Value: %s\n", value)
+			log.Printf("~ Transaction Destination: %s\n", tx.To())
 		} else {
-			log.Printf("Block transaction: %s\n", tx.Hash().String())
+			log.Printf("~ Block transaction: %s\n", tx.Hash().String())
 		}
-		log.Println("_________________________________________________________________________________________________")
+		log.Println("__________________________________________________________________________________________________")
 	}
 }
 
