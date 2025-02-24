@@ -1,4 +1,4 @@
-package types_utils
+package common
 
 import (
 	"bytes"
@@ -13,34 +13,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
 )
-
-// Map transaction type numbers to descriptive strings
-func GetTransactionTypeDescription(txType uint8) string {
-	switch txType {
-	case types.LegacyTxType:
-		return "Legacy Transaction"
-	case types.AccessListTxType:
-		return "Access List Transaction"
-	case types.DynamicFeeTxType:
-		return "Dynamic Fee Transaction"
-	case types.ArbitrumDepositTxType:
-		return "Arbitrum Deposit Transaction"
-	case types.ArbitrumUnsignedTxType:
-		return "Arbitrum Unsigned Transaction"
-	case types.ArbitrumContractTxType:
-		return "Arbitrum Contract Transaction"
-	case types.ArbitrumRetryTxType:
-		return "Arbitrum Retry Transaction"
-	case types.ArbitrumSubmitRetryableTxType:
-		return "Arbitrum Submit Retryable Transaction"
-	case types.ArbitrumInternalTxType:
-		return "Arbitrum Internal Transaction"
-	case types.ArbitrumLegacyTxType:
-		return "Arbitrum Legacy Transaction"
-	default:
-		return "Unknown Transaction Type"
-	}
-}
 
 func ParseL2Transactions(msg *L1IncomingMessage, chainId *big.Int) (types.Transactions, error) {
 	if len(msg.L2msg) > MaxL2MessageSize {

@@ -1,7 +1,6 @@
-package types_utils
+package common
 
 import (
-	"context"
 	"encoding/binary"
 	"fmt"
 
@@ -17,11 +16,6 @@ type MessageWithMetadata struct {
 	DelayedMessagesRead uint64             `json:"delayedMessagesRead"`
 }
 
-type MessageWithMetadataAndBlockHash struct {
-	MessageWithMeta MessageWithMetadata
-	BlockHash       *common.Hash
-}
-
 func (m *MessageWithMetadata) Hash(sequenceNumber MessageIndex, chainId uint64) (common.Hash, error) {
 	serializedExtraData := make([]byte, 24)
 	binary.BigEndian.PutUint64(serializedExtraData[:8], uint64(sequenceNumber))
@@ -34,9 +28,4 @@ func (m *MessageWithMetadata) Hash(sequenceNumber MessageIndex, chainId uint64) 
 	}
 
 	return crypto.Keccak256Hash(uniquifyingPrefix, serializedExtraData, serializedMessage), nil
-}
-
-type InboxMultiplexer interface {
-	Pop(context.Context) (*MessageWithMetadata, error)
-	DelayedMessagesRead() uint64
 }

@@ -1,92 +1,26 @@
-package types_utils
+package common
 
 import (
-	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 
-	espressoTypes "github.com/EspressoSystems/espresso-sequencer-go/types"
 	"github.com/ccoveille/go-safecast"
 
+	"github.com/EspressoSystems/espresso-sequencer-go/types/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/log"
 )
 
-const MAX_ATTESTATION_QUOTE_SIZE int = 4 * 1024
 const LEN_SIZE int = 8
 const INDEX_SIZE int = 8
 
+// Parameters imported from the espresso-sequencer-go package
+type HotShotResponse struct {
+	Proof        *json.RawMessage     `json:"proof"`
+	Transactions []common.Transaction `json:"transactions"`
+}
+
 type MessageIndex uint64
-
-type SubmittedEspressoTx struct {
-	Hash    string
-	Pos     []MessageIndex
-	Payload []byte
-}
-
-func BuildRawHotShotPayload(
-	msgPositions []MessageIndex,
-	msgFetcher func(MessageIndex) ([]byte, error),
-	maxSize int64,
-) ([]byte, int) {
-
-	payload := []byte{}
-	msgCnt := 0
-
-	for _, p := range msgPositions {
-		msgBytes, err := msgFetcher(p)
-		if err != nil {
-			log.Warn("failed to fetch the message", "pos", p)
-			break
-		}
-
-		sizeBuf := make([]byte, LEN_SIZE)
-		positionBuf := make([]byte, INDEX_SIZE)
-
-		if len(payload)+len(sizeBuf)+len(msgBytes)+len(positionBuf)+MAX_ATTESTATION_QUOTE_SIZE > int(maxSize) {
-			break
-		}
-		binary.BigEndian.PutUint64(sizeBuf, uint64(len(msgBytes)))
-		binary.BigEndian.PutUint64(positionBuf, uint64(p))
-
-		// Add the submitted txn position and the size of the message along with the message
-		payload = append(payload, positionBuf...)
-		payload = append(payload, sizeBuf...)
-		payload = append(payload, msgBytes...)
-		msgCnt += 1
-	}
-	return payload, msgCnt
-}
-
-func SignHotShotPayload(
-	unsigned []byte,
-	signer func([]byte) ([]byte, error),
-) ([]byte, error) {
-	quote, err := signer(unsigned)
-	if err != nil {
-		return nil, err
-	}
-
-	quoteSizeBuf := make([]byte, LEN_SIZE)
-	binary.BigEndian.PutUint64(quoteSizeBuf, uint64(len(quote)))
-	// Put the signature first. That would help easier parsing.
-	result := quoteSizeBuf
-	result = append(result, quote...)
-	result = append(result, unsigned...)
-
-	return result, nil
-}
-
-func ValidateIfPayloadIsInBlock(p []byte, payloads []espressoTypes.Bytes) bool {
-	validated := false
-	for _, payload := range payloads {
-		if bytes.Equal(p, payload) {
-			validated = true
-			break
-		}
-	}
-	return validated
-}
 
 func ParseHotShotPayload(payload []byte) (signature []byte, userDataHash []byte, indices []uint64, messages [][]byte, err error) {
 	if len(payload) < LEN_SIZE {
