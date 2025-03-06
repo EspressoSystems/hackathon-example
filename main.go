@@ -11,6 +11,7 @@ import (
 
 func main() {
 	InitLogger()
+	log.Println("Starting the application...")
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
