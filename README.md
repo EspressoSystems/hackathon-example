@@ -1,6 +1,6 @@
 # Rollup Transaction Monitor
 
-This is a Go application that monitors an your rollup for specific transactions. The application acts as a security bot that watches for outgoing transactions from your wallet address that exceed a configured value threshold, helping you detect potentially unauthorized transfers or drained funds.
+This is a Go application that monitors an espresso integrated rollup for specific transactions. The application acts as a security bot that watches for outgoing transactions from your wallet address that exceed a configured value threshold, helping you detect potentially unauthorized transfers or drained funds.
 
 ## Overview
 
